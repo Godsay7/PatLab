@@ -15,7 +15,7 @@ namespace PatLab1.Simulation
             Hour += hours;
 
             Day += Hour / 24;
-            Hour = Hour % 24;   
+            Hour = Hour % 24;
         }
     }
 }

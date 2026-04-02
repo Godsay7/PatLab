@@ -295,8 +295,8 @@ namespace PatLab1.UI
 
         private static void AdvanceTimeMenu()
         {
-            Console.Write("Enter number of hours to advance: ");
-            if (!int.TryParse(Console.ReadLine(), out int hours) || hours <= 0)
+            Console.Write("Enter number of hours to advance (4 hour maximum): ");
+            if (!int.TryParse(Console.ReadLine(), out int hours) || hours <= 0 || hours > 4)
             {
                 Console.WriteLine("Invalid number of hours.");
                 return;
@@ -319,4 +319,3 @@ namespace PatLab1.UI
         }
     }
 }
-
