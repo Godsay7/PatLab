@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PatLab1.Models.Environments
 {
-    public class Nature : Environment
+    public class Nature : Environments
     {
         public Nature()
         {

@@ -7,7 +7,7 @@ using PatLab1.Models.Capabilities;
 
 namespace PatLab1.Models.Animals
 {
-    public class Cat : Animal, IRunnable
+    public class Cat : Animal, IFastMovable, ISoundable
     {
         public Cat() 
         {
@@ -17,15 +17,9 @@ namespace PatLab1.Models.Animals
             Wings = 0;
         }
 
-        public void Run()
+        public void MakeSound()
         {
-            if (HourSinceLastMeal > 8)
-            {
-                Console.WriteLine("Cat want to eat and can't running");
-                Walk();
-            }
-            else
-                Console.WriteLine("Cat is running");
+            Console.WriteLine("*Meow!*");
         }
     }
 }

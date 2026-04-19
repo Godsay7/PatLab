@@ -7,7 +7,7 @@ using PatLab1.Models.Capabilities;
 
 namespace PatLab1.Models.Animals
 {
-    public class Spider : Animal, IRunnable
+    public class Spider : Animal
     {
         public Spider() {
             NameAnimal = "Spider";
@@ -15,15 +15,9 @@ namespace PatLab1.Models.Animals
             Paws = 8;
             Wings = 0;
         }
-        public void Run()
+        public void Move()
         {
-            if (HourSinceLastMeal > 8)
-            {
-                Console.WriteLine("Spider want to eat and can't running");
-                Walk();
-            }
-            else
-                Console.WriteLine("Spider is running");
+            Console.WriteLine("Spider is crawling");
         }
     }
 }

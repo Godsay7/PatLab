@@ -8,7 +8,7 @@ using PatLab1.Models.Animals;
 
 namespace PatLab1.Models.Environments
 {
-    public class PetShop : Environment
+    public class PetShop : Environments
     {
         public PetShop()
         {
@@ -23,10 +23,10 @@ namespace PatLab1.Models.Environments
             animal.WasCleanedToday = true;
         }
 
-        public void FeedOne(Animal animal)
+        public bool FeedOne(Animal animal)
         {
-            if (animal == null) return;
-            animal.Eat();
+            if (animal.Eat()) return true;
+            else return false;
         }
         public void CleanAll()
         {

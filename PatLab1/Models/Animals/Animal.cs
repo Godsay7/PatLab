@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,14 +9,14 @@ using PatLab1.Models.States;
 
 namespace PatLab1.Models.Animals
 {
-    public abstract class Animal : ICrawlable, IWalkable
+    public abstract class Animal : IMovable
     {
-        public int id { get; set; }
         public string NameAnimal { get; protected set; } = string.Empty;
         public int Eyes { get; protected set; }
         public int Paws { get; protected set; }
         public int Wings { get; protected set; }
-        public int HourSinceLastMeal { get; set; } = 0;
+        public int HourSinceLastMeal { get; protected set; } = 0;
+        public int id { get; set; }
         public bool IsHappy { get; set; } = true;
         public int MealsToday { get; set; } = 0;
         public bool WasCleanedToday { get; set; } = false;
@@ -32,29 +33,17 @@ namespace PatLab1.Models.Animals
             StateChanged?.Invoke(this, State);
         }
 
-        public void Eat()
+        public bool Eat()
         {
-            if (State == PhysicalStates.Dead)
+            if (MealsToday >= 5 || HourSinceLastMeal < 3)
             {
-                Console.WriteLine($"The {NameAnimal} is dead and cannot eat.");
-                return;
-            }
-
-            if (MealsToday >= 5)
-            {
-                Console.WriteLine($"The {NameAnimal} has already eaten the maximum number of times today.");
-                return;
-            }
-
-            if (HourSinceLastMeal < 3)
-            {
-                Console.WriteLine($"The {NameAnimal} is not hungry yet (last meal was {HourSinceLastMeal} hours ago).");
-                return;
+                return false;
             }
 
             MealsToday += 1;
             HourSinceLastMeal = 0;
             ChangeState(PhysicalStates.Full);
+            return true;
         }
 
         public void PassTime(int hours, bool isEndOfDay)
@@ -67,33 +56,31 @@ namespace PatLab1.Models.Animals
 
             HourSinceLastMeal += hours;
 
-            if (HourSinceLastMeal > 8 && State != PhysicalStates.Dead)
+            if (HourSinceLastMeal >= 8 && State != PhysicalStates.Dead && State != PhysicalStates.HungryTired)
             {
                 ChangeState(PhysicalStates.HungryTired);
             }
 
             if (isEndOfDay)
             {
-                if (MealsToday == 0 || MealsToday > 5)
+                if (MealsToday == 0 && HourSinceLastMeal >= 12)
                 {
                     ChangeState(PhysicalStates.Dead);
                 }
-                else if (State != PhysicalStates.Dead)
+                else
                 {
                     MealsToday = 0;
-                    WasCleanedToday = false;
+                    if (WasCleanedToday == false)
+                    {
+                        IsHappy = false;
+                    }
+                    else if (WasCleanedToday == true)
+                    {
+                        IsHappy = true;
+                        WasCleanedToday = false;
+                    }
                 }
             }
-        }
-
-        public void Craw()
-        {
-            Console.WriteLine($"{NameAnimal} is crawling");
-        }
-
-        public void Walk()
-        {
-            Console.WriteLine($"{NameAnimal} is walking");
         }
     }
 }

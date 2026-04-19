@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace PatLab1.Models.Capabilities
 {
-    public interface IWalkable
+    public interface IFastMovable
     {
-        void Walk();
+        void MoveFast() 
+        {
+            Console.WriteLine("The animal is running.");
+        }
     }
 }

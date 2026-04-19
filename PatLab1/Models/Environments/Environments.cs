@@ -9,13 +9,28 @@ using PatLab1.Models.States;
 
 namespace PatLab1.Models.Environments
 {
-    public abstract class Environment
+    public abstract class Environments
     {
         public List<Animal> ListOfAnimals { get; set; } = new List<Animal>();
         public int MaxAnimals { get; protected set; }
         public string Name { get; protected set; } = string.Empty;
 
         public event Action<string> NotificationRaised;
+        protected void OnAnimalStateChanged(Animal animal, PhysicalStates newState)
+        {
+            if (newState == PhysicalStates.HungryTired)
+            {
+                string msg = $"{animal.NameAnimal}, with id {animal.id} is tired and hungry!";
+                NotificationRaised?.Invoke(msg);
+            }
+            else if (newState == PhysicalStates.Dead)
+            {
+                string msg = $"Unfortunately, {animal.NameAnimal}, with id {animal.id} has passed away";
+                NotificationRaised?.Invoke(msg);
+                RemoveAnimal(animal);
+            }
+        }
+
         public void AddAnimal(Animal animal) 
         {
             if (MaxAnimals > ListOfAnimals.Count) 
@@ -24,20 +39,6 @@ namespace PatLab1.Models.Environments
                 animal.StateChanged += OnAnimalStateChanged;
             }
             else Console.WriteLine("Limit of animals");
-        }
-        protected virtual void OnAnimalStateChanged(Animal animal, PhysicalStates newState)
-        {
-            if (newState == PhysicalStates.HungryTired) 
-            {
-                string msg = $"Animal {animal.NameAnimal} is tired or hungry!";
-                NotificationRaised?.Invoke(msg);
-            }
-            else if (newState == PhysicalStates.Dead)
-            {
-                string msg = $"Your {animal.NameAnimal} was died.";
-                NotificationRaised?.Invoke(msg);
-                RemoveAnimal(animal);
-            }
         }
 
         public void RemoveAnimal(Animal animal) 

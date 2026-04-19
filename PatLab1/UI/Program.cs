@@ -5,14 +5,14 @@ using PatLab1.Models.Environments;
 using PatLab1.Models.States;
 using PatLab1.Models.Capabilities;
 using PatLab1.Simulation;
+using PatLab1.Models.Factories;
 
 namespace PatLab1.UI
 {
     internal class Program
     {
         private static readonly TimeSimulations _clock = new TimeSimulations();
-        private static readonly List<PatLab1.Models.Environments.Environment> _environments = new List<PatLab1.Models.Environments.Environment>();
-        private static int _nextAnimalId = 1;
+        private static readonly List<Environments> _environments = new List<Environments>();
 
         private static void Main(string[] args)
         {
@@ -24,7 +24,7 @@ namespace PatLab1.UI
                 ShowStatus();
                 Console.WriteLine();
                 Console.WriteLine("=== Animal Simulation ===");
-                Console.WriteLine("Current time: Day {0}, Hour {1}", _clock.Day + 1, _clock.Hour);
+                Console.WriteLine("Current time: Day {0}, Hour {1}", _clock.Day, _clock.Hour + 1);
                 Console.WriteLine("1. Add animal to environment");
                 Console.WriteLine("2. Feed an animal");
                 Console.WriteLine("3. Clean after an animal / all in pet shop");
@@ -66,10 +66,18 @@ namespace PatLab1.UI
         }
 
         private static void InitializeEnvironments()
-        {
-            _environments.Add(new Home());
-            _environments.Add(new PetShop());
-            _environments.Add(new Nature());
+        {   
+            Home myHome = new Home();
+            myHome.NotificationRaised += PrintSimulationMessage;
+            _environments.Add(myHome);
+
+            PetShop myPetShop = new PetShop();
+            myPetShop.NotificationRaised += PrintSimulationMessage;
+            _environments.Add(myPetShop);
+
+            Nature myNature = new Nature();
+            myNature.NotificationRaised += PrintSimulationMessage;
+            _environments.Add(myNature);
         }
 
         private static void ShowStatus()
@@ -80,7 +88,7 @@ namespace PatLab1.UI
                 Console.WriteLine($"Environment: {env.Name} (animals: {env.ListOfAnimals.Count}/{env.MaxAnimals})");
                 foreach (var a in env.ListOfAnimals)
                 {
-                    var happy = env is Nature ? "Happy (wild)" : a.IsHappy ? "Happy" : "Not happy";
+                    var happy = env is Nature ? "Happy (wild)" : a.IsHappy ? "Happy" : "Sad";
                     Console.WriteLine(
                         $"  Id={a.id}, {a.NameAnimal}, State={a.State}, MealsToday={a.MealsToday}, " +
                         $"HoursSinceLastMeal={a.HourSinceLastMeal}, {happy}");
@@ -88,7 +96,7 @@ namespace PatLab1.UI
             }
         }
 
-        private static PatLab1.Models.Environments.Environment ChooseEnvironment()
+        private static Environments ChooseEnvironment()
         {
             for (int i = 0; i < _environments.Count; i++)
             {
@@ -107,7 +115,7 @@ namespace PatLab1.UI
             return null;
         }
 
-        private static Animal ChooseAnimal(PatLab1.Models.Environments.Environment env)
+        private static Animal ChooseAnimal(Environments env)
         {
             if (env == null || env.ListOfAnimals.Count == 0)
             {
@@ -146,31 +154,19 @@ namespace PatLab1.UI
             Console.WriteLine("3. Parrot");
             Console.WriteLine("4. Spider");
             Console.Write("Type: ");
-
-            Animal animal = null;
+            
             var input = Console.ReadLine();
-            switch (input)
-            {
-                case "1":
-                    animal = new Cat();
-                    break;
-                case "2":
-                    animal = new Dog();
-                    break;
-                case "3":
-                    animal = new Parrot();
-                    break;
-                case "4":
-                    animal = new Spider();
-                    break;
-                default:
-                    Console.WriteLine("Unknown animal type.");
-                    return;
-            }
+            Animal animal = AnimalFactory.CreateAnimal(input);
 
-            animal.id = _nextAnimalId++;
-            env.AddAnimal(animal);
-            Console.WriteLine($"{animal.NameAnimal} added to {env.Name} with id={animal.id}.");
+            if (animal == null)
+            {
+                Console.WriteLine("Unknown animal type.");
+            }
+            else
+            {
+                env.AddAnimal(animal);
+                Console.WriteLine($"{animal.NameAnimal} added to {env.Name} with id={animal.id}.");
+            }
         }
 
         private static void FeedAnimalMenu()
@@ -186,13 +182,34 @@ namespace PatLab1.UI
             switch (env)
             {
                 case Home home:
-                    home.Feed(animal);
+                    if (home.Feed(animal))
+                    {
+                        Console.WriteLine($"{animal.NameAnimal} has eaten.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{animal.NameAnimal}, ID:{animal.id} is not hungry.");
+                    }
                     break;
                 case PetShop shop:
-                    shop.FeedOne(animal);
+                    if (shop.FeedOne(animal))
+                    {
+                        Console.WriteLine($"{animal.NameAnimal} has eaten.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{animal.NameAnimal}, ID:{animal.id} is not hungry.");
+                    }
                     break;
                 default:
-                    animal.Eat();
+                    if (animal.Eat())
+                    {
+                        Console.WriteLine($"{animal.NameAnimal} has eaten.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{animal.NameAnimal}, ID:{animal.id} is not hungry.");
+                    }
                     break;
             }
         }
@@ -257,35 +274,49 @@ namespace PatLab1.UI
             Console.WriteLine("2. Fly (if supported)");
             Console.WriteLine("3. Sing (if supported)");
             Console.WriteLine("4. Walk");
-            Console.WriteLine("5. Crawl");
             Console.Write("Action: ");
             var input = Console.ReadLine();
 
             switch (input)
             {
                 case "1":
-                    if (animal is IRunnable runnable)
-                        runnable.Run();
+                    if (animal is IFastMovable fastmovable)
+                        if (animal.State == PhysicalStates.HungryTired)
+                        {
+                            Console.WriteLine("The animal wants to eat and can't move fast.");
+                        }
+                        else
+                            fastmovable.MoveFast();
                     else
-                        Console.WriteLine("This animal cannot run.");
+                        Console.WriteLine("This animal cannot move fast.");
                     break;
                 case "2":
                     if (animal is IFlyable flyable)
-                        flyable.Fly();
+                        if (animal.State == PhysicalStates.HungryTired)
+                        {
+                            Console.WriteLine("The animal wants to eat and can't flying.");
+                        }
+                        else
+                            flyable.Fly(); 
                     else
                         Console.WriteLine("This animal cannot fly.");
                     break;
                 case "3":
-                    if (animal is ISingable singable)
-                        singable.Sing();
+                    if (animal is ISoundable singable)
+                        if (animal.State == PhysicalStates.HungryTired)
+                        {
+                            Console.WriteLine("The animal wants to eat and can't singing.");
+                        }
+                        else
+                            singable.MakeSound();
                     else
-                        Console.WriteLine("This animal cannot sing.");
+                        Console.WriteLine("This animal cannot make sound.");
                     break;
                 case "4":
-                    animal.Walk();
-                    break;
-                case "5":
-                    animal.Craw();
+                    if (animal is IMovable movable)
+                        movable.Move();
+                    else
+                        Console.WriteLine("This animal cannot move.");
                     break;
                 default:
                     Console.WriteLine("Unknown action.");
@@ -295,27 +326,28 @@ namespace PatLab1.UI
 
         private static void AdvanceTimeMenu()
         {
-            Console.Write("Enter number of hours to advance (4 hour maximum): ");
-            if (!int.TryParse(Console.ReadLine(), out int hours) || hours <= 0 || hours > 4)
+            Console.Write("Enter number of hours to advance (8 hour maximum): ");
+            if (!int.TryParse(Console.ReadLine(), out int hours) || hours <= 0 || hours > 8)
             {
                 Console.WriteLine("Invalid number of hours.");
                 return;
             }
 
-            for (int i = 0; i < hours; i++)
+            int previousDay = _clock.Day;
+            _clock.UpdateTime(hours);
+            bool isEndOfDay = _clock.Day > previousDay;
+            
+            foreach (var env in _environments)
             {
-                int previousDay = _clock.Day;
-                _clock.UpdateTime(1);
-                bool isEndOfDay = _clock.Day > previousDay;
-
-                foreach (var env in _environments)
+                foreach (var a in env.ListOfAnimals.ToList())
                 {
-                    foreach (var a in env.ListOfAnimals)
-                    {
-                        a.PassTime(1, isEndOfDay);
-                    }
+                    a.PassTime(hours, isEndOfDay);
                 }
             }
+        }
+        static void PrintSimulationMessage(string message)
+        {
+            Console.WriteLine($"{message}");
         }
     }
 }

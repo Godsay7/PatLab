@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace PatLab1.Models.Capabilities
 {
-    public interface ICrawlable
+    public interface IMovable
     {
-        void Craw();
+        void Move() 
+        {
+            Console.WriteLine("The animal is moving.");
+        }
     }
 }

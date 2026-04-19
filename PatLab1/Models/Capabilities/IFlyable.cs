@@ -8,6 +8,9 @@ namespace PatLab1.Models.Capabilities
 {
     public interface IFlyable
     {
-        void Fly();
+        void Fly()
+        {
+            Console.WriteLine("The animal is flying.");
+        }
     }
 }

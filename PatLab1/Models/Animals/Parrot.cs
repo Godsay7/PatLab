@@ -8,7 +8,7 @@ using PatLab1.Models.Capabilities;
 
 namespace PatLab1.Models.Animals
 {
-    public class Parrot : Animal, IFlyable, ISingable
+    public class Parrot : Animal, IFlyable, ISoundable
     {
         public Parrot()
         {
@@ -17,25 +17,9 @@ namespace PatLab1.Models.Animals
             Paws = 2;
             Wings = 2;
         }
-        public void Fly()
+        public void MakeSound()
         {
-            if (HourSinceLastMeal > 8)
-            {
-                Console.WriteLine("The parrot wants to eat and can't fly.");
-                Walk();
-            }
-            else
-                Console.WriteLine("Parrot is flying");
-        }
-
-        public void Sing()
-        {
-            if (HourSinceLastMeal > 8)
-            {
-                Console.WriteLine("The parrot wants to eat and can't sing.");
-            }
-            else
-                Console.WriteLine("Parrot is singing");
+            Console.WriteLine("Parrot is singing");
         }
     }
 }

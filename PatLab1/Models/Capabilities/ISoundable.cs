@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace PatLab1.Models.Capabilities
 {
-    public interface IRunnable
+    public interface ISoundable
     {
-        void Run();
+        void MakeSound() 
+        {
+            Console.WriteLine("The animal makes some sound.");
+        }   
     }
 }

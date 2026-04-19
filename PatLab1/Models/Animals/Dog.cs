@@ -8,7 +8,7 @@ using PatLab1.Models.Capabilities;
 
 namespace PatLab1.Models.Animals
 {
-    public class Dog : Animal, IRunnable
+    public class Dog : Animal, IFastMovable, ISoundable
     {
         public Dog()
         {
@@ -18,15 +18,9 @@ namespace PatLab1.Models.Animals
             Wings = 0;
         }
         
-        public void Run()
+        public void MakeSound()
         {
-            if (HourSinceLastMeal > 8)
-            {
-                Console.WriteLine("Dog want to eat and can't running");
-                Walk();
-            }
-            else
-                Console.WriteLine("Dog is running");
+            Console.WriteLine("*Rough rough*");
         }
     }
 }
